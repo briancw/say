@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Captain TTS</title>
+</head>
+<body>
+
+    <!-- <audio id="dum" src="voice data/dum.mp3"></audio> -->
+
+    <script src="jquery.min.js"></script>
+    <script>
+        var sounds = {};
+        var current_wait = 0;
+        var ctx = new AudioContext();
+        var files = [
+            ['dum', 'voice_data/dum.mp3'],
+            ['da', 'voice_data/da.mp3']
+        ];
+        var sounds_loaded = 0;
+
+        for (var i in files) {
+            load_sound(files[i][0], files[i][1]);
+        }
+
+        function load_sound(name, url) {
+            var request = new XMLHttpRequest();
+            request.open('GET', url, true);
+            request.responseType = 'arraybuffer';
+
+            request.onload = function() {
+                ctx.decodeAudioData(request.response, function(buffer) {
+                    sounds[name] = buffer;
+
+                    sounds_loaded++;
+                    if (sounds_loaded === files.length) {
+                        sounds_ready();
+                    }
+                }, load_error);
+            };
+
+            request.send();
+        }
+
+        function sounds_ready() {
+            console.log(sounds);
+
+            p('dum', 0, 0.75);
+            p('dum', 0.75, 0.8);
+            p('dum', 0.75, 0.85);
+            p('dum', 0.75, 0.9);
+            p('dum', 0.75, 0.95);
+            p('dum', 0.75, 1);
+            p('dum', 0.75, 1.1);
+            p('dum', 0.75, 1.2);
+        }
+
+        function p(sound_name, wait, pitch) {
+            current_wait += (wait * 1000);
+            setTimeout(function() {
+                var sound = ctx.createBufferSource();
+                sound.buffer = sounds[sound_name];
+                sound.connect(ctx.destination);
+                sound.playbackRate.value = pitch ? pitch : 1;
+                sound.start(0);
+            }, current_wait);
+        }
+
+        function load_error(err) {
+            throw err;
+        }
+    </script>
+</body>
+</html>
